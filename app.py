@@ -21,9 +21,8 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    mv = db.get_or_404(Movie, 1)
-    print(mv.title)
-    return render_template("index.html")
+    movies = Movie.query.all()
+    return render_template("index.html", movies=movies)
 
 
 if __name__ == '__main__':
