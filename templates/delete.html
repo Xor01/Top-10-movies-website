@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Delete Movies{% endblock %}
+
+{% block content %}
+
+  <h1 class="heading">{{ movie.title }}</h1>
+    <p class="description">Delete Movie</p>
+    <div class="container-fluid">
+        {% from 'bootstrap5/form.html' import render_field %}
+        <form method="post">
+            {{ form.csrf_token() }}
+            {{ render_field(form.delete, button_style='danger') }}
+            {{ render_field(form.cancel, button_style='secondary') }}
+        </form>
+    </div>
+{% endblock %}

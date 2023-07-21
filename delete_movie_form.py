@@ -3,5 +3,5 @@ from wtforms import SubmitField
 
 
 class DeleteMovieForm(FlaskForm):
-    Delete = SubmitField(label='Delete')
+    delete = SubmitField(label='Delete')
     cancel = SubmitField(label='Cancel')

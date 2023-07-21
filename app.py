@@ -4,7 +4,8 @@ import requests
 from dotenv import load_dotenv
 from os import getenv
 from movie_tabel import db, Movie
-from rate_movie_form import RateMovieForm
+from update_movie_form import UpdateMovieForm
+from delete_movie_form import DeleteMovieForm
 
 load_dotenv()
 app = Flask(__name__)
@@ -26,7 +27,7 @@ def home():
 @app.route('/edit/<int:movie_id>', methods=['POST', 'GET'])
 def edit(movie_id):
     movie = db.get_or_404(Movie, movie_id)
-    form = RateMovieForm()
+    form = UpdateMovieForm()
     if request.method == 'POST':
         new_rating = request.form.get('rating')
         new_review = request.form.get('review')
@@ -37,6 +38,20 @@ def edit(movie_id):
             db.session.commit()
         return redirect(url_for('home'))
     return render_template('edit.html', movie=movie, form=form)
+
+
+@app.route('/delete/<int:movie_id>', methods=['POST', 'GET'])
+def delete(movie_id):
+    if request.method == 'POST':
+        if request.form.get('delete'):
+            with app.app_context():
+                movie_to_delete = db.get_or_404(Movie, movie_id)
+                db.session.delete(movie_to_delete)
+                db.session.commit()
+        return redirect(url_for('home'))
+    movie = db.get_or_404(Movie, movie_id)
+    form = DeleteMovieForm()
+    return render_template('delete.html', movie=movie, form=form)
 
 
 if __name__ == '__main__':
