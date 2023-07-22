@@ -11,6 +11,7 @@ from delete_movie_form import DeleteMovieForm
 from search_movie_form import SearchMovieForm
 
 load_dotenv()
+tmdb_api = getenv("TMDB_API")
 app = Flask(__name__)
 app.config['SECRET_KEY'] = getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('MOVIES_URI')
@@ -59,18 +60,42 @@ def delete(movie_id):
 
 @app.route('/add', methods=['POST', 'GET'])
 def add():
+    movie_id = request.args.get('movie_id')
+    if movie_id:
+        url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {tmdb_api}"
+        }
+        try:
+            response = requests.get(url, headers=headers).json()
+            results = response
+            if results:
+                movie_to_add = Movie(
+                    title=results['original_title'],
+                    year=results['release_date'].split("-")[0],
+                    description=results['overview'],
+                    rating=results['vote_average'],
+                    ranking=None,
+                    review=None,
+                    img_url=f"https://image.tmdb.org/t/p/w500{results['poster_path']}"
+                )
+                with app.app_context():
+                    db.session.add(movie_to_add)
+                    db.session.commit()
+                    return redirect(url_for('edit', movie_id=movie_to_add.id))
+        except Exception as e:
+            print(e)
     form = SearchMovieForm()
     if form.validate_on_submit():
         movies_results = request_movie(form.search_field.data)
-        print(form.search_field.data)
         return render_template('select.html', results=movies_results)
     return render_template('add.html', form=form)
 
 
 def request_movie(movie_name):
-    tmdb_api = getenv("TMDB_API")
-    url = f"https://api.themoviedb.org/3/search/movie?query={movie_name}"
-    print(url)
+    movie_name = str(movie_name).strip()
+    url = f"https://api.themoviedb.org/3/search/movie?query={urllib.parse.quote(movie_name)}"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {tmdb_api}",
