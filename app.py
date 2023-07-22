@@ -25,6 +25,9 @@ with app.app_context():
 @app.route("/")
 def home():
     movies = Movie.query.all()
+    for i in range(len(movies)):
+        movies[i].ranking = len(movies) - i
+    db.session.commit()
     return render_template("index.html", movies=movies)
 
 
