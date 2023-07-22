@@ -24,7 +24,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    movies = Movie.query.all()
+    movies = db.session.execute(db.select(Movie).order_by(Movie.rating)).scalars().all()
     for i in range(len(movies)):
         movies[i].ranking = len(movies) - i
     db.session.commit()
